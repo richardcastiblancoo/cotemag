@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes</title>
+    <link rel="stylesheet" href="/css/administrador.css">
+    <link rel="shortcut icon" href="/public/iconos/logo5.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="text-img">
+            <img class="logo-cotemag" src="/public/iconos/logo5.png" alt="">
+            <h2 class="dashboard">dashboard</h2>
+        </div>
+
+        <input class="buscarest" type="search" name="" placeholder="buscar estudiante (id)" id="">
+
+        <div class="administrador">
+            <img src="" alt="administrador">
+        </div>
+    </header>
+
+    <hr>
+
+    <div class="flex gap-[2%] flex-wrap content-start">
+    </div>
+    <div class="w-1/4 h-3/4">
+        <a href=""></a>
+    </div>
+
+    <div class="grow h-3/4">
+
+    </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+    </script>
+
+    <script src="/js/script.js"></script>
+
+    <div class="container mt-4">
+        <button class="btn btn-primary mb-3" onclick="openAddModal()">Agregar Estudiante</button>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>EPS</th>
+                    <th>Correo</th>
+                    <th>Edad</th>
+                    <th>Cédula</th>
+                    <th>Número</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para agregar/editar estudiante -->
+    <div class="modal fade" id="studentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Agregar Estudiante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentForm">
+                        <input type="hidden" id="editIndex">
+                        <div class="mb-3">
+                            <label>Foto:</label>
+                            <input type="file" class="form-control" id="foto" accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>EPS:</label>
+                            <input type="text" class="form-control" id="eps" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Correo:</label>
+                            <input type="email" class="form-control" id="correo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Edad:</label>
+                            <input type="number" class="form-control" id="edad" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Cédula:</label>
+                            <input type="text" class="form-control" id="cedula" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Número:</label>
+                            <input type="tel" class="form-control" id="numero" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStudent()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = JSON.parse(localStorage.getItem('students')) || [];
+        const modal = new bootstrap.Modal(document.getElementById('studentModal'));
+
+        function openAddModal() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('modalTitle').textContent = 'Agregar Estudiante';
+            document.getElementById('editIndex').value = '';
+            modal.show();
+        }
+
+        function saveStudent() {
+            const form = document.getElementById('studentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const fileInput = document.getElementById('foto');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    saveStudentData(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveStudentData('');
+            }
+        }
+
+        function saveStudentData(imageData) {
+            const student = {
+                foto: imageData,
+                nombre: document.getElementById('nombre').value,
+                apellido: document.getElementById('apellido').value,
+                eps: document.getElementById('eps').value,
+                correo: document.getElementById('correo').value,
+                edad: document.getElementById('edad').value,
+                cedula: document.getElementById('cedula').value,
+                numero: document.getElementById('numero').value
+            };
+
+            const editIndex = document.getElementById('editIndex').value;
+            if (editIndex === '') {
+                students.push(student);
+            } else {
+                students[editIndex] = student;
+            }
+
+            localStorage.setItem('students', JSON.stringify(students));
+            modal.hide();
+            displayStudents();
+        }
+
+        function editStudent(index) {
+            const student = students[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('nombre').value = student.nombre;
+            document.getElementById('apellido').value = student.apellido;
+            document.getElementById('eps').value = student.eps;
+            document.getElementById('correo').value = student.correo;
+            document.getElementById('edad').value = student.edad;
+            document.getElementById('cedula').value = student.cedula;
+            document.getElementById('numero').value = student.numero;
+            document.getElementById('modalTitle').textContent = 'Editar Estudiante';
+            modal.show();
+        }
+
+        function deleteStudent(index) {
+            if (confirm('¿Está seguro de eliminar este estudiante?')) {
+                students.splice(index, 1);
+                localStorage.setItem('students', JSON.stringify(students));
+                displayStudents();
+            }
+        }
+
+        function displayStudents() {
+            const tbody = document.getElementById('studentTableBody');
+            const searchTerm = document.querySelector('.buscarest').value.toLowerCase();
+
+            tbody.innerHTML = '';
+            students.forEach((student, index) => {
+                if (student.cedula.toLowerCase().includes(searchTerm)) {
+                    const row = `
+                    <tr>
+                        <td><img src="${student.foto}" alt="Foto" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                        <td>${student.nombre}</td>
+                        <td>${student.apellido}</td>
+                        <td>${student.eps}</td>
+                        <td>${student.correo}</td>
+                        <td>${student.edad}</td>
+                        <td>${student.cedula}</td>
+                        <td>${student.numero}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editStudent(${index})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${index})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+                    tbody.innerHTML += row;
+                }
+            });
+        }
+
+        document.querySelector('.buscarest').addEventListener('input', displayStudents);
+
+        // Initial display
+        displayStudents();
+    </script>
+</body>
+
+</html>
